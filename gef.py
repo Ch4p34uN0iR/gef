@@ -375,7 +375,7 @@ class Color:
 
         colors = Color.colors
         msg = [colors[attr] for attr in attrs.split() if attr in colors]
-        msg.append(text)
+        msg.append(str(text))
         if colors["highlight"] in msg :   msg.append(colors["highlight_off"])
         if colors["underline"] in msg :   msg.append(colors["underline_off"])
         if colors["blink"] in msg :       msg.append(colors["blink_off"])
@@ -8854,7 +8854,7 @@ class GefCommand(gdb.Command):
                                 gdb.execute("source {:s}".format(fpath))
             nb_added = len(self.loaded_commands) - nb_inital
             if nb_added > 0:
-                ok("{:s} extra commands added from '{:s}'".format(Color.colorify(str(nb_added), "bold green"),
+                ok("{:s} extra commands added from '{:s}'".format(Color.colorify(nb_added, "bold green"),
                                                                   Color.colorify(directory, "bold blue")))
         except gdb.error as e:
             err("failed: {}".format(str(e)))
@@ -8912,13 +8912,13 @@ class GefCommand(gdb.Command):
             ver = "{:d}.{:d}".format(sys.version_info.major, sys.version_info.minor)
             nb_cmds = len(self.loaded_commands)
             gef_print("{:s} commands loaded for GDB {:s} using Python engine {:s}"
-                      .format(Color.colorify(str(nb_cmds), "bold green"),
+                      .format(Color.colorify(nb_cmds, "bold green"),
                               Color.colorify(gdb.VERSION, "bold yellow"),
                               Color.colorify(ver, "bold red")))
 
             if nb_missing:
                 warn("{:s} command{} could not be loaded, run `{:s}` to know why."
-                          .format(Color.colorify(str(nb_missing), "bold red"),
+                          .format(Color.colorify(nb_missing, "bold red"),
                                   "s" if nb_missing > 1 else "",
                                   Color.colorify("gef missing", "underline pink")))
         return
@@ -9024,7 +9024,11 @@ class GefConfigCommand(gdb.Command):
         _value, _type, _desc = res
         _setting = Color.colorify(plugin_name, "pink bold underline")
         _type = _type.__name__
-        _value = Color.colorify(str(_value), "yellow") if _type!='str' else '"{:s}"'.format(Color.colorify(str(_value), string_color))
+        if _type == "str":
+            _value = '"{:s}"'.format(Color.colorify(_value, string_color))
+        else:
+            _value = Color.colorify(_value, "yellow")
+
         gef_print("{:s} ({:s}) = {:s}".format(_setting, _type, _value))
 
         if show_description:
